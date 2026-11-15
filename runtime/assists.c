@@ -54,3 +54,11 @@ uint32_t rt_stamina(uint32_t oldv, uint32_t newv) {
 // Infinite arrows: the bow's shot takes its arrows off the pouch through one function, which returns before taking
 // any (tools/patches.py _remove_arrows). One arrow is still needed to shoot.
 int rt_infinite_arrows(void) { return g_settings.infinite_arrows; }
+
+// Just-avoid window (Accessibility; tools/patches.py _justavoid_time): the back jump and side step actions start
+// their just-avoid timer at this value. The game's own is 1.0, one 1/30 s frame; the timer falls one a frame.
+float rt_justavoid_time(float v) {
+    int pct = g_settings.justavoid_scale;
+    if (pct <= 0 || pct == 100) return v;
+    return v * (float)pct / 100.0f;
+}

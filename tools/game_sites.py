@@ -300,6 +300,11 @@ SITES = [
          'bd42e660', 0),
     # the stamina setter's store, PlayerInfo +0xa4 (tools/patches.py _stamina)
     Site('stamina_store', 'code', '1e204008 94000000/fc000000 bd00a668 f9400ff3 a940fbfd fc4207e8 d65f03c0', 2),
+    # Accessibility > Just-avoid window (tools/patches.py _justavoid_time; runtime/assists.c): the load of the
+    # JustAvoidTime static param in the back jump and side step actions, before it becomes the player's timer
+    # (player +0x1844 and +0x1848, falling one a frame: the game's 1.0 is one 1/30 s frame)
+    Site('justavoid_time_bj', 'code', 'bd400120 b9184d14 bd184500 bd184900 f9402269 f9400668 bd400120 b9185914', 0),
+    Site('justavoid_time_ss', 'code', 'bd400120 b9184d14 bd184500 bd184900 f9402e69 f9400668 bd400120 b9185914', 0),
     # the pouch taking arrows off for the player's bow (tools/patches.py _remove_arrows; Accessibility > Infinite arrows)
     Site('pouch_remove_arrows', 'code', 'd101c3ff a9017bfd a9026ffc a90367fa a9045ff8 a90557f6 a9064ff4 910043fd '
          '90000008/9f00001f aa0003f3 f9400108/ffc003ff aa0103e0', 0),
@@ -570,6 +575,8 @@ KNOWN = {
         'link_life_store': 0x7000cc4e70,
         'link_life_tick': 0x7000cc4da4,
         'stamina_store': 0x7000cc7430,
+        'justavoid_time_bj': 0x7000c63fec,
+        'justavoid_time_ss': 0x7000c90be0,
         'item_tick': 0x7000cc4c3c,
         'pouch_item_get': 0x7000d921bc,
         'pouch_mgr': 0x7001e18570,

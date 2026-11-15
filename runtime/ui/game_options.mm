@@ -166,6 +166,7 @@ constexpr int k_haze[] = HAZE_CHOICES;
 constexpr int k_wear[] = {0, 50, 100, 150, 200, 250, 300};
 const char *const k_wear_name[] = {"Fairy", "Peter Pan", "Hylian", "Hero", "Master", "Legend", "Dude, are you ok?"};
 const char *const k_wear_times[] = {"0x", "0.5x", "1x", "1.5x", "2x", "2.5x", "3x"};  // percent (Video > Haze)
+constexpr int k_justavoid[] = {100, 150, 200, 250, 300, 400, 500, 600, 800};  // percent of the game's own window
 // (shown with Potato first, the smallest: k_shadow_order maps a row index to settings.h SHADOW_*)
 const char *const k_shadow[] = {"Console (896)", "High (2048)", "Ultra (4096)", "Savage (8192)", "Potato (448)"};  // (SHADOW_*)
 const int k_shadow_order[] = {SHADOW_POTATO, SHADOW_CONSOLE, SHADOW_HIGH, SHADOW_ULTRA, SHADOW_EXTREME};
@@ -969,6 +970,18 @@ void build_items(void) {
                            g_settings.no_weapon_wear = k_wear[x] == 0;
                        },
                        2));
+    // Just-avoid window (assists.c rt_justavoid_time): the game's timer is 0.25 s at 100%
+    v.push_back(choice(P_ACCESS, "Just-avoid window",
+                       "How long a perfect dodge stays possible. 100% is the game's own; higher is longer.",
+                       [](const Item &) { return N(k_justavoid); },
+                       [](const Item &, int x) {
+                           static std::string s;
+                           s = pct(k_justavoid[x]);
+                           return s.c_str();
+                       },
+                       [](const Item &) { return nearest(k_justavoid, N(k_justavoid), (float)g_settings.justavoid_scale); },
+                       [](const Item &, int x) { g_settings.justavoid_scale = k_justavoid[x]; },
+                       0));
     v.push_back(toggle(P_ACCESS, "Infinite arrows", "Shooting a bow uses up no arrows. You still need one to shoot.",
                        [](const Item &) { return (int)g_settings.infinite_arrows; },
                        [](const Item &, int x) { g_settings.infinite_arrows = x; }, 0));
