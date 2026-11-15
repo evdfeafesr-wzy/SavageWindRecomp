@@ -998,6 +998,10 @@ void build_items(void) {
     v.push_back(toggle(P_ACCESS, "Infinite arrows", "Shooting a bow uses up no arrows. You still need one to shoot.",
                        [](const Item &) { return (int)g_settings.infinite_arrows; },
                        [](const Item &, int x) { g_settings.infinite_arrows = x; }, 0));
+    v.push_back(toggle(P_ACCESS, "Auto pickup",
+                       "Picks up the material in your A prompt by pressing A now and then in play. Turn it off while talking to people.",
+                       [](const Item &) { return (int)g_settings.auto_pickup; },
+                       [](const Item &, int x) { g_settings.auto_pickup = x; }, 0));
     v.push_back(toggle(P_ACCESS, "Infinite stamina", "The stamina wheel never runs out.",
                        [](const Item &) { return (int)g_settings.infinite_stamina; },
                        [](const Item &, int x) { g_settings.infinite_stamina = x; }, 0));

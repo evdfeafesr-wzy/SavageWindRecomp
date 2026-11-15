@@ -168,6 +168,7 @@ typedef struct {
     int justavoid_scale;     // the perfect dodge (just avoid) window, percent of the game's own value (JUSTAVOID_MIN..MAX)
     int guard_window_scale;  // the perfect guard (parry) window, percent of the game's own value (GUARD_WINDOW_MIN..MAX)
     bool infinite_arrows;    // shooting a bow takes no arrows from the pouch
+    bool auto_pickup;        // press A now and then in play: the game picks up the material in its A prompt
     bool infinite_stamina;   // the stamina wheel never goes down
     bool infinite_rupees;    // the wallet is kept at 9999 rupees (runtime/rupees.c)
     int weather;             // WEATHER_COUNT: the game's, rain or thunderstorms kept out, or one weather held (weather.c)

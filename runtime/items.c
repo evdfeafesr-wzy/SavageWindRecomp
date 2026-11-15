@@ -21,13 +21,16 @@
 
 #include "control.h"
 #include "cpu.h"
+#include "framepace.h"
 #include "gamelib.h"
+#include "game_sites.h"
 #include "hle.h"
 #include "items.h"
 #include "language.h"
 #include "nvn/tegra.h"
 #include "rt.h"
 #include "services/archive.h"
+#include "settings.h"
 #include "ui/i18n.h"
 
 uint8_t *fs_game_file(const char *path, size_t *out_n);  // runtime/services/fs.c
@@ -366,10 +369,27 @@ bool items_request(int i, int count) {
     return ok;
 }
 
+// Accessibility > Auto pickup (settings.h): while the player is in play, press A now and then. The game picks up the
+// material in its own A prompt (the game's own pickup range); anything else A would use there is picked too.
+extern volatile int g_inject_a;  // hle/input.c
+static uint64_t last_a_press;
+RT_ON_RESET(auto_pickup_reset) { last_a_press = 0; }
+static void auto_pickup_tick(void) {
+    if (!g_settings.auto_pickup) return;
+    if (!g_site.player_info || !LD64(g_site.player_info)) return;
+    if (g_site.pause_state && LD32(g_site.pause_state) != 0) return;
+    if (framepace_title_ui() || framepace_menu_ui()) return;
+    uint64_t now = plat_now_ns();
+    if (last_a_press && now - last_a_press < 300000000ull) return;  // (0.3 s: the game polls A over several frames)
+    last_a_press = now;
+    g_inject_a = 1;
+}
+
 // The game thread, every frame in play (tools/patches.py _item_tick: at a function's entry, so only its arguments are
 // live; the whole guest CPU state is put back afterwards). get: the item get; mgr: where the pause menu data's address
 // is; sstr_vt: sead::SafeString's vtable. The name and its SafeString go on the guest stack below sp.
 void rt_item_tick(Cpu *c, uint64_t get, uint64_t mgr, uint64_t sstr_vt) {
+    auto_pickup_tick();
     if (!atomic_load_explicit(&g_pending, memory_order_relaxed)) return;
     Request req[32];
     pthread_mutex_lock(&g_req_lock);

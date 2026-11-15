@@ -908,9 +908,10 @@ static void host_test_frame(uint64_t frame) {
 
 static uint64_t g_pad_obj;
 volatile int g_inject_plus;  // frames to hold Plus for the game (movie.c: A/B skip a skippable movie)
+volatile int g_inject_a;     // frames to hold A for the game (runtime/items.c: auto pickup)
 RT_ON_RESET(input_reboot_reset) {
     consumed_buttons = 0;
-    g_pad_obj = 0; g_inject_plus = 0;
+    g_pad_obj = 0; g_inject_plus = 0; g_inject_a = 0;
 }  // (reboot: the controller object was guest memory)
 
 // Gameplay > Start at Continue: past the start screen by itself, into the latest save. A is pressed now and then while
@@ -1041,6 +1042,12 @@ static void fill_state(Cpu *c) {
         static uint64_t until;
         if (g_inject_plus > 0) { until = renderer_present_count() + 10; g_inject_plus = 0; }
         if (renderer_present_count() < until) b |= 1ull << BTN_PLUS;
+    }
+    {   // injected A: a short press (~4 presented frames), for auto pickup (runtime/items.c)
+        extern uint64_t renderer_present_count(void);
+        static uint64_t until_a;
+        if (g_inject_a > 0) { until_a = renderer_present_count() + 4; g_inject_a = 0; }
+        if (renderer_present_count() < until_a) b |= 1ull << BTN_A;
     }
     // (the controller's sticks turning a shrine apparatus move neither Link nor the camera meanwhile)
     bool sticks = !menu && !dualstick_on();

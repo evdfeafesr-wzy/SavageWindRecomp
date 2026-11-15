@@ -344,6 +344,7 @@ void settings_load(void) {
         else if (!strcmp(key, "justavoid_scale")) g_settings.justavoid_scale = atoi(val);  // (percent)
         else if (!strcmp(key, "guard_window_scale")) g_settings.guard_window_scale = atoi(val);  // (percent)
         else if (!strcmp(key, "infinite_arrows")) g_settings.infinite_arrows = atoi(val) != 0;
+        else if (!strcmp(key, "auto_pickup")) g_settings.auto_pickup = atoi(val) != 0;
         else if (!strcmp(key, "save_backups")) g_settings.save_backups = atoi(val) != 0;
         else if (!strcmp(key, "stick_camera_speed")) g_settings.stick_cam_on = atoi(val) != 0;
         else if (!strcmp(key, "stick_camera_x")) g_settings.stick_cam_x = atoi(val);  // (percent)
@@ -572,6 +573,7 @@ void settings_save(void) {
     fprintf(f, "justavoid_scale = %d\n", g_settings.justavoid_scale);
     fprintf(f, "guard_window_scale = %d\n", g_settings.guard_window_scale);
     fprintf(f, "infinite_arrows = %d\n", g_settings.infinite_arrows);
+    fprintf(f, "auto_pickup = %d\n", g_settings.auto_pickup);
     fprintf(f, "infinite_stamina = %d\n", g_settings.infinite_stamina);
     fprintf(f, "infinite_rupees = %d\n", g_settings.infinite_rupees);
     int wx = g_settings.weather;
