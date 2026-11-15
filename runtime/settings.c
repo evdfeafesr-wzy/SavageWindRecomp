@@ -35,6 +35,7 @@ Settings g_settings = {
     .damage_dealt = 100,
     .weapon_wear = 100,
     .justavoid_scale = 100,
+    .guard_window_scale = 100,
     .upscaler = UPSCALE_DEFAULT,  // (Off: the window's resolution; MetalFX on macOS)
     .upscale_quality = UPQ_QUALITY,
     .game_fxaa = true,
@@ -341,6 +342,7 @@ void settings_load(void) {
         else if (!strcmp(key, "no_weapon_wear")) g_settings.no_weapon_wear = atoi(val) != 0;
         else if (!strcmp(key, "weapon_wear")) g_settings.weapon_wear = atoi(val);  // (percent)
         else if (!strcmp(key, "justavoid_scale")) g_settings.justavoid_scale = atoi(val);  // (percent)
+        else if (!strcmp(key, "guard_window_scale")) g_settings.guard_window_scale = atoi(val);  // (percent)
         else if (!strcmp(key, "infinite_arrows")) g_settings.infinite_arrows = atoi(val) != 0;
         else if (!strcmp(key, "save_backups")) g_settings.save_backups = atoi(val) != 0;
         else if (!strcmp(key, "stick_camera_speed")) g_settings.stick_cam_on = atoi(val) != 0;
@@ -455,6 +457,7 @@ void settings_load(void) {
     g_settings.rumble_strength = CLAMP(g_settings.rumble_strength, RUMBLE_STRENGTH_MIN, RUMBLE_STRENGTH_MAX);
     g_settings.weapon_wear = CLAMP(g_settings.weapon_wear, WEAPON_WEAR_MIN, WEAPON_WEAR_MAX);
     g_settings.justavoid_scale = CLAMP(g_settings.justavoid_scale, JUSTAVOID_MIN, JUSTAVOID_MAX);
+    g_settings.guard_window_scale = CLAMP(g_settings.guard_window_scale, GUARD_WINDOW_MIN, GUARD_WINDOW_MAX);
     if (g_settings.no_weapon_wear) g_settings.weapon_wear = 0;  // (Unbreakable weapons is Weapon wear's Fairy, 0x)
 #undef CLAMP
     for (int i = 0; i < 2; i++)
@@ -567,6 +570,7 @@ void settings_save(void) {
     fprintf(f, "no_weapon_wear = %d\n", g_settings.no_weapon_wear);
     fprintf(f, "weapon_wear = %d\n", g_settings.weapon_wear);
     fprintf(f, "justavoid_scale = %d\n", g_settings.justavoid_scale);
+    fprintf(f, "guard_window_scale = %d\n", g_settings.guard_window_scale);
     fprintf(f, "infinite_arrows = %d\n", g_settings.infinite_arrows);
     fprintf(f, "infinite_stamina = %d\n", g_settings.infinite_stamina);
     fprintf(f, "infinite_rupees = %d\n", g_settings.infinite_rupees);

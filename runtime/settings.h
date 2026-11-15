@@ -166,6 +166,7 @@ typedef struct {
     bool no_weapon_wear;     // weapons, bows and shields lose no durability and never break
     int weapon_wear;         // how fast they wear out otherwise, percent of the game's (WEAPON_WEAR_MIN..MAX)
     int justavoid_scale;     // the perfect dodge (just avoid) window, percent of the game's own value (JUSTAVOID_MIN..MAX)
+    int guard_window_scale;  // the perfect guard (parry) window, percent of the game's own value (GUARD_WINDOW_MIN..MAX)
     bool infinite_arrows;    // shooting a bow takes no arrows from the pouch
     bool infinite_stamina;   // the stamina wheel never goes down
     bool infinite_rupees;    // the wallet is kept at 9999 rupees (runtime/rupees.c)
@@ -209,7 +210,9 @@ const char *settings_file(void);  // savagewind.ini, or SAVAGEWIND_SETTINGS
 #define WEAPON_WEAR_MIN 0    // (Accessibility > Weapon wear, percent: 0 = never wear out, as no_weapon_wear)
 #define WEAPON_WEAR_MAX 300
 #define JUSTAVOID_MIN 100    // (Accessibility > Just-avoid window, percent of the game's own timer value)
-#define JUSTAVOID_MAX 800
+#define JUSTAVOID_MAX 1000
+#define GUARD_WINDOW_MIN 100 // (Accessibility > Perfect guard window, percent of the game's own 0.1 s)
+#define GUARD_WINDOW_MAX 500
 #define WEATHER_COUNT 12  // (weather: 0 the game's, 1 no rain, 2 no thunderstorms, 3 + the game's weather type, held)
 extern const char *const g_weather_keys[WEATHER_COUNT];  // (the ini and `weather` names: game, no_rain, ..., sun_shower)
 #define DAMAGE_CHOICES {25, 50, 75, 100, 150, 200, 300, 400}  // (Accessibility's damage multipliers, percent)

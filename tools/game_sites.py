@@ -305,6 +305,9 @@ SITES = [
     # (player +0x1844 and +0x1848, falling one a frame: the game's 1.0 is one 1/30 s frame)
     Site('justavoid_time_bj', 'code', 'bd400120 b9184d14 bd184500 bd184900 f9402269 f9400668 bd400120 b9185914', 0),
     Site('justavoid_time_ss', 'code', 'bd400120 b9184d14 bd184500 bd184900 f9402e69 f9400668 bd400120 b9185914', 0),
+    # Accessibility > Perfect guard window (tools/patches.py _guard_window): the store of the guard window into the
+    # player (player +0x1fd4; 0.1 s is the game's own, compared with the time since the shield went up)
+    Site('guard_window_store', 'code', 'bd1fd400 d65f03c0', 0),
     # the pouch taking arrows off for the player's bow (tools/patches.py _remove_arrows; Accessibility > Infinite arrows)
     Site('pouch_remove_arrows', 'code', 'd101c3ff a9017bfd a9026ffc a90367fa a9045ff8 a90557f6 a9064ff4 910043fd '
          '90000008/9f00001f aa0003f3 f9400108/ffc003ff aa0103e0', 0),
@@ -577,6 +580,7 @@ KNOWN = {
         'stamina_store': 0x7000cc7430,
         'justavoid_time_bj': 0x7000c63fec,
         'justavoid_time_ss': 0x7000c90be0,
+        'guard_window_store': 0x7000cda19c,
         'item_tick': 0x7000cc4c3c,
         'pouch_item_get': 0x7000d921bc,
         'pouch_mgr': 0x7001e18570,

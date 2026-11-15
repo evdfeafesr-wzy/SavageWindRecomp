@@ -62,3 +62,11 @@ float rt_justavoid_time(float v) {
     if (pct <= 0 || pct == 100) return v;
     return v * (float)pct / 100.0f;
 }
+
+// Perfect guard window (Accessibility; tools/patches.py _guard_window): the game stores 0.1 s into the player's guard
+// window (player +0x1fd4) and compares it with the time since the shield went up.
+float rt_guard_window(float v) {
+    int pct = g_settings.guard_window_scale;
+    if (pct <= 0 || pct == 100) return v;
+    return v * (float)pct / 100.0f;
+}

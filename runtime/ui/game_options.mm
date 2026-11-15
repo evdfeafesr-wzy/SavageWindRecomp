@@ -166,7 +166,8 @@ constexpr int k_haze[] = HAZE_CHOICES;
 constexpr int k_wear[] = {0, 50, 100, 150, 200, 250, 300};
 const char *const k_wear_name[] = {"Fairy", "Peter Pan", "Hylian", "Hero", "Master", "Legend", "Dude, are you ok?"};
 const char *const k_wear_times[] = {"0x", "0.5x", "1x", "1.5x", "2x", "2.5x", "3x"};  // percent (Video > Haze)
-constexpr int k_justavoid[] = {100, 150, 200, 250, 300, 400, 500, 600, 800};  // percent of the game's own window
+constexpr int k_justavoid[] = {100, 150, 200, 250, 300, 400, 500, 600, 800, 1000};  // percent of the game's own window
+constexpr int k_guard[] = {100, 150, 200, 250, 300, 400, 500};  // percent of the game's 0.1 s guard window
 // (shown with Potato first, the smallest: k_shadow_order maps a row index to settings.h SHADOW_*)
 const char *const k_shadow[] = {"Console (896)", "High (2048)", "Ultra (4096)", "Savage (8192)", "Potato (448)"};  // (SHADOW_*)
 const int k_shadow_order[] = {SHADOW_POTATO, SHADOW_CONSOLE, SHADOW_HIGH, SHADOW_ULTRA, SHADOW_EXTREME};
@@ -981,6 +982,18 @@ void build_items(void) {
                        },
                        [](const Item &) { return nearest(k_justavoid, N(k_justavoid), (float)g_settings.justavoid_scale); },
                        [](const Item &, int x) { g_settings.justavoid_scale = k_justavoid[x]; },
+                       0));
+    // Perfect guard window (assists.c rt_guard_window): the game's guard window is 0.1 s at 100%
+    v.push_back(choice(P_ACCESS, "Perfect guard window",
+                       "How long a raised shield can catch an attack as a perfect guard. 100% is the game's own (about 0.1 s).",
+                       [](const Item &) { return N(k_guard); },
+                       [](const Item &, int x) {
+                           static std::string s;
+                           s = pct(k_guard[x]);
+                           return s.c_str();
+                       },
+                       [](const Item &) { return nearest(k_guard, N(k_guard), (float)g_settings.guard_window_scale); },
+                       [](const Item &, int x) { g_settings.guard_window_scale = k_guard[x]; },
                        0));
     v.push_back(toggle(P_ACCESS, "Infinite arrows", "Shooting a bow uses up no arrows. You still need one to shoot.",
                        [](const Item &) { return (int)g_settings.infinite_arrows; },

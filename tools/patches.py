@@ -859,6 +859,18 @@ def _justavoid_time(gen, a):
             'memcpy(&u, (const void *)(uintptr_t)c->x[9], 4); memcpy(&v, &u, 4); '
             'v = rt_justavoid_time(v); memcpy(&u, &v, 4); c->v[0] = (__uint128_t)u; }'
             f'  /* {a:#x}: ldr s0, [x9] (JustAvoidTime: Accessibility) */')
+
+
+# Accessibility > Perfect guard window (runtime/assists.c rt_guard_window): the store of the guard window into the
+# player (1.9.0: player +0x1fd4). The game sets it to 0.1 s; the comparison against the time since the shield went up
+# is 0x7000cd32f0. The store stays, its value scaled.
+
+def _guard_window(gen, a):
+    assert _word(gen, a) == 0xbd1fd400, hex(_word(gen, a))  # str s0, [x0, #0x1fd4]
+    return ('{ extern float rt_guard_window(float); uint32_t u; float v; '
+            'memcpy(&u, &c->v[0], 4); memcpy(&v, &u, 4); v = rt_guard_window(v); memcpy(&u, &v, 4); '
+            'c->v[0] = (__uint128_t)u; ST32(c->x[0] + 0x1fd4, u); }'
+            f'  /* {a:#x}: str s0, [x0, #0x1fd4] (Perfect guard window: Accessibility) */')
 # Adding items (runtime/items.c rt_item_tick): at the entry of Link's damage handling (every frame in play, on the game
 # thread, as picking an item up is) the runtime calls the pause menu data's item get for what was asked for. The item
 # get takes the item's name as a sead::SafeString; its vtable is the one the item get itself loads (`adrp x26` /
@@ -1043,6 +1055,7 @@ PATCHES = {
     'stamina_store': _stamina,
     'justavoid_time_bj': _justavoid_time,
     'justavoid_time_ss': _justavoid_time,
+    'guard_window_store': _guard_window,
     'item_tick': _item_tick,
 }
 
