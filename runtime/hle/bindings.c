@@ -18,14 +18,17 @@ _Static_assert(PADB_LTRIGGER == SDL_GAMEPAD_BUTTON_COUNT, "trigger pseudo-button
 // (interact, confirm), left click = Y (attack), right click = ZL (shield, lock on), F = ZR (bow), Q = L (rune),
 // R = R (throw), Left Ctrl = left stick press (crouch), middle click = right stick press (look), Tab = Plus
 // (inventory), M = Minus (map), 1 / 2 / 3 / 4 = d-pad right / left / up / down (weapons, shields, runes, whistle:
-// the quick menus), T held = the mouse tilts the controller (motion puzzles, runtime/hle/motion.c). Esc and F1 stay the overlay menu's (runtime/ui/menu.mm).
+// the quick menus), T held = the mouse tilts the controller (motion puzzles, runtime/hle/motion.c), G held = auto pickup
+// (runtime/items.c). Esc and F1 stay the overlay menu's (runtime/ui/menu.mm).
 #define DEF_PAD { \
     SDL_GAMEPAD_BUTTON_EAST, SDL_GAMEPAD_BUTTON_SOUTH, SDL_GAMEPAD_BUTTON_NORTH, SDL_GAMEPAD_BUTTON_WEST, \
     SDL_GAMEPAD_BUTTON_LEFT_STICK, SDL_GAMEPAD_BUTTON_RIGHT_STICK, SDL_GAMEPAD_BUTTON_LEFT_SHOULDER, \
     SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER, PADB_LTRIGGER, PADB_RTRIGGER, SDL_GAMEPAD_BUTTON_START, SDL_GAMEPAD_BUTTON_BACK, \
     SDL_GAMEPAD_BUTTON_DPAD_LEFT, SDL_GAMEPAD_BUTTON_DPAD_UP, SDL_GAMEPAD_BUTTON_DPAD_RIGHT, SDL_GAMEPAD_BUTTON_DPAD_DOWN, \
     [BIND_WALK ... BIND_GYRO_CENTER] = -1, \
-    [BIND_FLY] = SDL_GAMEPAD_BUTTON_MISC1}  /* fly mode (test builds): the Capture / Share / Mute button, which the game never uses */
+    [BIND_FLY] = SDL_GAMEPAD_BUTTON_MISC1, \
+    [BIND_PICKUP] = -1}  /* fly mode (test builds): the Capture / Share / Mute button, which the game never uses; auto
+                            pickup: nothing until the player binds it */
 #define DEF_KEY { \
     SDL_SCANCODE_E, SDL_SCANCODE_LSHIFT, SDL_SCANCODE_SPACE, BIND_MOUSE + SDL_BUTTON_LEFT, SDL_SCANCODE_LCTRL, \
     BIND_MOUSE + SDL_BUTTON_MIDDLE, SDL_SCANCODE_Q, SDL_SCANCODE_R, BIND_MOUSE + SDL_BUTTON_RIGHT, SDL_SCANCODE_F, \
@@ -34,7 +37,7 @@ _Static_assert(PADB_LTRIGGER == SDL_GAMEPAD_BUTTON_COUNT, "trigger pseudo-button
     SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_I, SDL_SCANCODE_K, \
     SDL_SCANCODE_J, SDL_SCANCODE_L, SDL_SCANCODE_C, SDL_SCANCODE_T, \
     SDL_SCANCODE_I, SDL_SCANCODE_K, SDL_SCANCODE_J, SDL_SCANCODE_L, SDL_SCANCODE_U, SDL_SCANCODE_O, SDL_SCANCODE_P, \
-    SDL_SCANCODE_F7}
+    SDL_SCANCODE_F7, SDL_SCANCODE_G}
 static const int16_t k_def_pad[BIND_KEY_COUNT] = DEF_PAD, k_def_key[BIND_KEY_COUNT] = DEF_KEY;
 int16_t g_bind_pad[BIND_KEY_COUNT] = DEF_PAD, g_bind_key[BIND_KEY_COUNT] = DEF_KEY;
 
@@ -44,6 +47,7 @@ static const char *const k_ini[BIND_KEY_COUNT] = {
     "a", "b", "x", "y", "lstick", "rstick", "l", "r", "zl", "zr", "plus", "minus", "left", "up", "right", "down",
     "ls_up", "ls_down", "ls_left", "ls_right", "rs_up", "rs_down", "rs_left", "rs_right", "walk", "tilt",
     "gyro_up", "gyro_down", "gyro_left", "gyro_right", "gyro_turn_left", "gyro_turn_right", "gyro_center", "fly",
+    "pickup",
 };
 // What each raw Switch input does apart from the 41 actions: the Key bindings page and the F1 overlay list these by
 // function, never by the Switch button. The two with no function of their own (left stick press, D-pad Down: the
@@ -59,6 +63,7 @@ static const char *const k_names[BIND_KEY_COUNT] = {
     "Gyro tilt up", "Gyro tilt down", "Gyro tilt left", "Gyro tilt right",
     "Gyro turn left", "Gyro turn right", "Gyro recenter",
     "Fly mode (test builds)",
+    "Auto pickup (hold)",
 };
 // controller buttons by position (savagewind.ini)
 static const char *const k_pad_ini[PADB_HOST_COUNT] = {
@@ -631,6 +636,22 @@ static bool any_shares_interact(void) {
 static _Atomic uint64_t a_prev;
 static _Atomic bool a_served;  // a pressed query was answered since the last poll
 
+// Injected action (runtime/items.c auto pickup): the game's Interact action is reported pressed for a few polls even
+// when the player's keyboard/mouse binding would otherwise answer it. Not stored in the settings.
+static _Atomic int a_inject_id = -1;
+static _Atomic int a_injecting_id = -1;  // the action the injection answered for in the last poll
+static _Atomic uint64_t a_inject_until;
+void act_inject(int id, int ms) {
+    if (id < 0 || id >= ACT_COUNT) return;
+    atomic_store(&a_inject_id, id);
+    atomic_store(&a_inject_until, SDL_GetTicks() + (ms > 0 ? (uint64_t)ms : 1));
+}
+RT_ON_RESET(act_inject_reset) {
+    atomic_store(&a_inject_id, -1);
+    atomic_store(&a_injecting_id, -1);
+    atomic_store(&a_inject_until, 0);
+}
+
 void act_poll(bool live) {
     static bool was_live;
     uint64_t custom = a_custom;
@@ -648,6 +669,13 @@ void act_poll(bool live) {
     a_trig = (kept | edge) & custom;
     a_served = false;
     a_hold = cur;
+    int inj = atomic_load_explicit(&a_inject_id, memory_order_relaxed);
+    bool injected = live && inj >= 0 && now < atomic_load_explicit(&a_inject_until, memory_order_relaxed);
+    if (injected) {
+        a_trig |= 1ull << inj;
+        a_hold |= 1ull << inj;
+    }
+    atomic_store_explicit(&a_injecting_id, injected ? inj : -1, memory_order_relaxed);
     a_prev = cur;
     a_live = live;
     was_live = live;
@@ -667,8 +695,9 @@ int rt_act_query(int kind, uint64_t pad, uint64_t id, uint64_t lr, uint64_t mask
     } else {
         r = (int)(a_hold >> id & 1);
     }
-    if (r && shares_interact((int)id) && SDL_GetTicks() - a_prompt_ms < PROMPT_GRACE_MS)
-        r = 0;  // (the prompt's button answers the prompt)
+    bool injected = atomic_load_explicit(&a_injecting_id, memory_order_relaxed) == (int)id;
+    if (r && !injected && shares_interact((int)id) && SDL_GetTicks() - a_prompt_ms < PROMPT_GRACE_MS)
+        r = 0;  // (the prompt's button answers the prompt; an injected auto pickup still goes through)
     if (r && act_log_on()) l_true[kind] |= 1ull << id;
     return r;
 }

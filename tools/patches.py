@@ -871,6 +871,17 @@ def _guard_window(gen, a):
             'memcpy(&u, &c->v[0], 4); memcpy(&v, &u, 4); v = rt_guard_window(v); memcpy(&u, &v, 4); '
             'c->v[0] = (__uint128_t)u; ST32(c->x[0] + 0x1fd4, u); }'
             f'  /* {a:#x}: str s0, [x0, #0x1fd4] (Perfect guard window: Accessibility) */')
+
+
+# Accessibility > Cooked food duration (runtime/assists.c rt_cook_time): the final store of a CookItem's effect_time
+# (1.9.0: CookItem +0x214), after the clamp to 0..1800 s. The value is scaled by the setting; the game's own time then
+# still runs as it did, only longer.
+
+def _cook_time(gen, a):
+    assert _word(gen, a) == 0xb9021428, hex(_word(gen, a))  # str w8, [x1, #0x214]
+    return ('{ extern int rt_cook_time(int); int32_t v = rt_cook_time((int32_t)c->x[8]); '
+            'ST32(c->x[1] + 0x214, (uint32_t)v); }'
+            f'  /* {a:#x}: str w8, [x1, #0x214] (Cooked food duration: Accessibility) */')
 # Adding items (runtime/items.c rt_item_tick): at the entry of Link's damage handling (every frame in play, on the game
 # thread, as picking an item up is) the runtime calls the pause menu data's item get for what was asked for. The item
 # get takes the item's name as a sead::SafeString; its vtable is the one the item get itself loads (`adrp x26` /
@@ -1056,6 +1067,7 @@ PATCHES = {
     'justavoid_time_bj': _justavoid_time,
     'justavoid_time_ss': _justavoid_time,
     'guard_window_store': _guard_window,
+    'cook_time_store': _cook_time,
     'item_tick': _item_tick,
 }
 

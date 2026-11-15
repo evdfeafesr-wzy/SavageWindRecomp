@@ -308,6 +308,9 @@ SITES = [
     # Accessibility > Perfect guard window (tools/patches.py _guard_window): the store of the guard window into the
     # player (player +0x1fd4; 0.1 s is the game's own, compared with the time since the shield went up)
     Site('guard_window_store', 'code', 'bd1fd400 d65f03c0', 0),
+    # Accessibility > Cooked food duration (tools/patches.py _cook_time): the final clamp of a CookItem's effect_time
+    # (CookItem +0x214, 0..1800 s) after cooking; the store is scaled by the setting
+    Site('cook_time_store', 'code', 'b9021428 d65f03c0', 0),
     # the pouch taking arrows off for the player's bow (tools/patches.py _remove_arrows; Accessibility > Infinite arrows)
     Site('pouch_remove_arrows', 'code', 'd101c3ff a9017bfd a9026ffc a90367fa a9045ff8 a90557f6 a9064ff4 910043fd '
          '90000008/9f00001f aa0003f3 f9400108/ffc003ff aa0103e0', 0),
@@ -581,6 +584,7 @@ KNOWN = {
         'justavoid_time_bj': 0x7000c63fec,
         'justavoid_time_ss': 0x7000c90be0,
         'guard_window_store': 0x7000cda19c,
+        'cook_time_store': 0x7000cfe864,
         'item_tick': 0x7000cc4c3c,
         'pouch_item_get': 0x7000d921bc,
         'pouch_mgr': 0x7001e18570,

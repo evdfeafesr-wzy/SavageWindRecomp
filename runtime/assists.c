@@ -70,3 +70,12 @@ float rt_guard_window(float v) {
     if (pct <= 0 || pct == 100) return v;
     return v * (float)pct / 100.0f;
 }
+
+// Cooked food duration (Accessibility; tools/patches.py _cook_time): the effect time a dish gets when it is cooked,
+// after the game's own clamp (0..1800 s). A day at most.
+int rt_cook_time(int seconds) {
+    int pct = g_settings.cook_time_scale;
+    if (seconds <= 0 || pct <= 0 || pct == 100) return seconds;
+    int64_t v = (int64_t)seconds * pct / 100;
+    return v > 86400 ? 86400 : (int)v;
+}

@@ -211,7 +211,7 @@ extern "C" void controls_bindings_draw(float scale) {
     static const int other[] = {BIND_LS_UP, BIND_LS_DOWN, BIND_LS_LEFT, BIND_LS_RIGHT, BIND_RS_UP, BIND_RS_DOWN,
                                 BIND_RS_LEFT, BIND_RS_RIGHT, BIND_WALK, BIND_TILT, BIND_GYRO_UP, BIND_GYRO_DOWN,
                                 BIND_GYRO_LEFT, BIND_GYRO_RIGHT, BIND_GYRO_TURN_LEFT, BIND_GYRO_TURN_RIGHT,
-                                BIND_GYRO_CENTER, BIND_FLY};
+                                BIND_GYRO_CENTER, BIND_PICKUP, BIND_FLY};
     const int other_rows = (int)(sizeof other / sizeof *other) - (control_enabled() ? 0 : 1);  // (the fly row: test builds only)
     switch_table("##binds_other", other, other_rows, fam, cd, cs, ms);
 

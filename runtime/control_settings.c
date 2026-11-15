@@ -54,6 +54,7 @@ static const Setting settings[] = {
     I(color_lut_strength, 0, 100, NULL), B(color_lut_set), B(no_weapon_wear),
     I(weapon_wear, WEAPON_WEAR_MIN, WEAPON_WEAR_MAX, NULL), I(justavoid_scale, JUSTAVOID_MIN, JUSTAVOID_MAX, NULL),
     I(guard_window_scale, GUARD_WINDOW_MIN, GUARD_WINDOW_MAX, NULL),
+    I(cook_time_scale, COOK_TIME_MIN, COOK_TIME_MAX, NULL),
     B(infinite_arrows), B(auto_pickup),
     B(infinite_stamina), B(infinite_rupees), I(weather, 0, WEATHER_COUNT - 1,
                            "game|no_rain|no_storms|clear|cloudy|rain|heavy_rain|snow|heavy_snow|thunderstorm|thunder_rain|sun_shower"),

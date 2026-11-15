@@ -168,6 +168,7 @@ const char *const k_wear_name[] = {"Fairy", "Peter Pan", "Hylian", "Hero", "Mast
 const char *const k_wear_times[] = {"0x", "0.5x", "1x", "1.5x", "2x", "2.5x", "3x"};  // percent (Video > Haze)
 constexpr int k_justavoid[] = {100, 150, 200, 250, 300, 400, 500, 600, 800, 1000};  // percent of the game's own window
 constexpr int k_guard[] = {100, 150, 200, 250, 300, 400, 500};  // percent of the game's 0.1 s guard window
+constexpr int k_cook[] = {100, 150, 200, 250, 300, 400, 500, 600, 800, 1000};  // percent of the game's dish effect time
 // (shown with Potato first, the smallest: k_shadow_order maps a row index to settings.h SHADOW_*)
 const char *const k_shadow[] = {"Console (896)", "High (2048)", "Ultra (4096)", "Savage (8192)", "Potato (448)"};  // (SHADOW_*)
 const int k_shadow_order[] = {SHADOW_POTATO, SHADOW_CONSOLE, SHADOW_HIGH, SHADOW_ULTRA, SHADOW_EXTREME};
@@ -907,6 +908,8 @@ void build_items(void) {
     bind(BIND_WALK, bind_input_name(BIND_WALK));
     bind(BIND_TILT, bind_input_name(BIND_TILT));
     v.back().desc = "Hold it and move the mouse to tilt the controller. Press A, then the new key.";
+    bind(BIND_PICKUP, bind_input_name(BIND_PICKUP));
+    v.back().desc = "Hold it and Auto pickup picks up what is in your A prompt. Press A, then the new key.";
     static const char *const gyro_help[] = {"Tilt upward.", "Tilt downward.", "Tilt left.", "Tilt right.",
                                             "Rotate left on the third axis.", "Rotate right on the third axis.",
                                             "Reset orientation and stop pending rotation."};
@@ -995,11 +998,23 @@ void build_items(void) {
                        [](const Item &) { return nearest(k_guard, N(k_guard), (float)g_settings.guard_window_scale); },
                        [](const Item &, int x) { g_settings.guard_window_scale = k_guard[x]; },
                        0));
+    // Cooked food duration (assists.c rt_cook_time): the dish's effect time after cooking
+    v.push_back(choice(P_ACCESS, "Cooked food duration",
+                       "How long a cooked dish's effect lasts. 100% is the game's own; higher is longer.",
+                       [](const Item &) { return N(k_cook); },
+                       [](const Item &, int x) {
+                           static std::string s;
+                           s = pct(k_cook[x]);
+                           return s.c_str();
+                       },
+                       [](const Item &) { return nearest(k_cook, N(k_cook), (float)g_settings.cook_time_scale); },
+                       [](const Item &, int x) { g_settings.cook_time_scale = k_cook[x]; },
+                       0));
     v.push_back(toggle(P_ACCESS, "Infinite arrows", "Shooting a bow uses up no arrows. You still need one to shoot.",
                        [](const Item &) { return (int)g_settings.infinite_arrows; },
                        [](const Item &, int x) { g_settings.infinite_arrows = x; }, 0));
     v.push_back(toggle(P_ACCESS, "Auto pickup",
-                       "Picks up the material in your A prompt by pressing A now and then in play. Turn it off while talking to people.",
+                       "Hold the Auto pickup key (Controls page) and what is in your A prompt is picked up for you.",
                        [](const Item &) { return (int)g_settings.auto_pickup; },
                        [](const Item &, int x) { g_settings.auto_pickup = x; }, 0));
     v.push_back(toggle(P_ACCESS, "Infinite stamina", "The stamina wheel never runs out.",

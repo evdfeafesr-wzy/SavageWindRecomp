@@ -138,8 +138,17 @@ static bool held_pad(int slot) {
 
 static bool held_gyro(int slot) { return held_key(g_bind_key[slot]) || held_pad(slot); }
 
+// Auto pickup (runtime/items.c): the key or button the player holds to pick up materials, published with the rest
+static _Atomic bool pickup_held;
+bool input_pickup_held(void) { return atomic_load_explicit(&pickup_held, memory_order_relaxed); }
+static void recompute_pickup(void) {
+    atomic_store_explicit(&pickup_held, (game_key(g_bind_key[BIND_PICKUP]) && win_focused) || held_pad(BIND_PICKUP),
+                          memory_order_relaxed);
+}
+
 // Both event paths publish one combined motion state: releasing either device must not cancel the other.
 static void recompute_motion(void) {
+    recompute_pickup();
     if (gyro_keys_live())
         motion_keyboard(held_gyro(BIND_GYRO_DOWN) - held_gyro(BIND_GYRO_UP),
                         held_gyro(BIND_GYRO_RIGHT) - held_gyro(BIND_GYRO_LEFT),

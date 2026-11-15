@@ -25,6 +25,7 @@
 #include "gamelib.h"
 #include "game_sites.h"
 #include "hle.h"
+#include "input_bind.h"
 #include "items.h"
 #include "language.h"
 #include "nvn/tegra.h"
@@ -369,13 +370,15 @@ bool items_request(int i, int count) {
     return ok;
 }
 
-// Accessibility > Auto pickup (settings.h): while the player is in play, press A now and then. The game picks up the
-// material in its own A prompt (the game's own pickup range); anything else A would use there is picked too.
+// Accessibility > Auto pickup (settings.h): while the player holds the Auto pickup key / button in play, press A now and
+// then. The game picks up what is in its own A prompt (the game's own pickup range).
 extern volatile int g_inject_a;  // hle/input.c
+void act_inject(int id, int ms);  // hle/bindings.c (action 0 = Interact)
 static uint64_t last_a_press;
 RT_ON_RESET(auto_pickup_reset) { last_a_press = 0; }
 static void auto_pickup_tick(void) {
     if (!g_settings.auto_pickup) return;
+    if (!input_pickup_held()) return;
     if (!g_site.player_info || !LD64(g_site.player_info)) return;
     if (g_site.pause_state && LD32(g_site.pause_state) != 0) return;
     if (framepace_title_ui() || framepace_menu_ui()) return;
@@ -383,6 +386,7 @@ static void auto_pickup_tick(void) {
     if (last_a_press && now - last_a_press < 300000000ull) return;  // (0.3 s: the game polls A over several frames)
     last_a_press = now;
     g_inject_a = 1;
+    act_inject(0, 120);  // (Interact: also when the player bound it to a keyboard/mouse button)
 }
 
 // The game thread, every frame in play (tools/patches.py _item_tick: at a function's entry, so only its arguments are

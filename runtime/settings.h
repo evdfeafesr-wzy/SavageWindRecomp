@@ -167,6 +167,7 @@ typedef struct {
     int weapon_wear;         // how fast they wear out otherwise, percent of the game's (WEAPON_WEAR_MIN..MAX)
     int justavoid_scale;     // the perfect dodge (just avoid) window, percent of the game's own value (JUSTAVOID_MIN..MAX)
     int guard_window_scale;  // the perfect guard (parry) window, percent of the game's own value (GUARD_WINDOW_MIN..MAX)
+    int cook_time_scale;     // cooked food effect duration, percent of the game's own (COOK_TIME_MIN..MAX)
     bool infinite_arrows;    // shooting a bow takes no arrows from the pouch
     bool auto_pickup;        // press A now and then in play: the game picks up the material in its A prompt
     bool infinite_stamina;   // the stamina wheel never goes down
@@ -214,6 +215,8 @@ const char *settings_file(void);  // savagewind.ini, or SAVAGEWIND_SETTINGS
 #define JUSTAVOID_MAX 1000
 #define GUARD_WINDOW_MIN 100 // (Accessibility > Perfect guard window, percent of the game's own 0.1 s)
 #define GUARD_WINDOW_MAX 500
+#define COOK_TIME_MIN 100    // (Accessibility > Cooked food duration, percent of the game's own effect time)
+#define COOK_TIME_MAX 1000
 #define WEATHER_COUNT 12  // (weather: 0 the game's, 1 no rain, 2 no thunderstorms, 3 + the game's weather type, held)
 extern const char *const g_weather_keys[WEATHER_COUNT];  // (the ini and `weather` names: game, no_rain, ..., sun_shower)
 #define DAMAGE_CHOICES {25, 50, 75, 100, 150, 200, 300, 400}  // (Accessibility's damage multipliers, percent)

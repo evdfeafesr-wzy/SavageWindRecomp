@@ -24,6 +24,7 @@ enum {
     BIND_GYRO_UP, BIND_GYRO_DOWN, BIND_GYRO_LEFT, BIND_GYRO_RIGHT,  // key or controller button: virtual gyro during a shrine
     BIND_GYRO_TURN_LEFT, BIND_GYRO_TURN_RIGHT, BIND_GYRO_CENTER,    // apparatus (runtime/hle/motion.c motion_keyboard)
     BIND_FLY,                                            // toggles fly mode (control endpoint builds, runtime/control_fly.c)
+    BIND_PICKUP,                                         // held: auto pickup picks up materials (runtime/items.c)
     BIND_KEY_COUNT                                       // keyboard: buttons + both sticks + walk + tilt + gyro + fly
 };
 // BIND_DEV_ANY (a capture only): the next press of either device is taken, a controller button for the controller side,
@@ -42,6 +43,7 @@ static inline bool bind_key_same_context(int a, int b) {
 // What the player uses (runtime/hle/input.c input_last_device)
 enum { DEVICE_KEYBOARD, DEVICE_PAD };
 int input_last_device(void);
+bool input_pickup_held(void);  // the Auto pickup key / button is held now (main thread publishes it)
 int input_pad_family(void);  // the open controller: 0 Nintendo / other / none, 1 Xbox, 2 PlayStation, 3 Steam Deck
 bool input_window_focused(void);
 #define BIND_VALVE_VENDOR 0x28de  // (USB vendor of the Steam Deck's controls and of Steam Input's virtual pads)
